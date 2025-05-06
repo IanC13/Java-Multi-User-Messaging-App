@@ -38,7 +38,6 @@ public class ClientHandler implements Runnable {
             String name = in.readLine();
             
             // Validate username
-
             if (name == null) {
                 cleanup();
                 return;
@@ -56,10 +55,11 @@ public class ClientHandler implements Runnable {
             }
 
             out.println("You have entered the chat!");
-
+            
             // Announce new user
             this.username = name;
             server.broadcast(null, name + " has joined the chat.");
+            server.broadcastUserList(); 
 
             String message;
 
@@ -92,6 +92,7 @@ public class ClientHandler implements Runnable {
         if (username != null) {
             activeUsernames.remove(username);
             server.broadcast(null, username + " has left the chat");
+            server.broadcastUserList(); 
         }
         try { 
             socket.close(); 

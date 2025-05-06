@@ -32,13 +32,19 @@ public class Server {
     }
 
     // Broadcasting message to all connected clients, except self
-    public void broadcast(String senderUsername, String msg) { //, ClientHandler exclude) {
+    public void broadcast(String senderUsername, String msg) {
 
         for (ClientHandler c: clients) {
             c.send(senderUsername, msg);
-            // if (c != exclude) {
-            // }
         }
+    }
+
+    // To display all users connected
+    void broadcastUserList() {
+        String userList = String.join(",", usernames);
+
+        // Prefix with a marker so clients know it’s a user‐list update
+        broadcast(null, "USERLIST " + userList);
     }
 
     public static void main(String[] args) throws IOException {

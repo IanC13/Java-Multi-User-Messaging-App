@@ -23,6 +23,9 @@ public class ClientGUI {
     private BufferedReader in;
     private String username;
 
+    private DefaultListModel<String> connectedUserListModel;
+    private JList<String> connectedUserList;
+
     public void start() throws IOException {
         // Connection
         Socket socket = new Socket("localhost", ProtocolConstants.PORT);
@@ -139,16 +142,6 @@ public class ClientGUI {
         bottom.add(sendButton, BorderLayout.EAST);
         bottom.add(inputScroll, BorderLayout.CENTER);
 
-
-        // Add to farme
-        frame.getContentPane().setLayout(new BorderLayout());
-        frame.getContentPane().add(scroll, BorderLayout.CENTER);
-        frame.getContentPane().add(bottom, BorderLayout.SOUTH);
-        frame.setSize(800, 500);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-
-
         // Send message
         ActionListener sendAction = e -> {
             String msg = inputArea.getText().trim();
@@ -161,8 +154,27 @@ public class ClientGUI {
 
         sendButton.addActionListener(sendAction);
 
-        frame.setVisible(true);
+        // Add to farme
+        frame.getContentPane().setLayout(new BorderLayout());
+        frame.getContentPane().add(scroll, BorderLayout.CENTER);
+        frame.getContentPane().add(bottom, BorderLayout.SOUTH);
+        frame.setSize(800, 500);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
+
+        // Display connected users on a right list
+        connectedUserListModel = new DefaultListModel<>();
+        connectedUserList = new JList<>(connectedUserListModel);
+
+        connectedUserList.setBorder(BorderFactory.createTitledBorder("Connected Users"));
+        connectedUserList.setPreferredSize(new Dimension(200, 0));
+
+        // Add it as a sidebar:
+        frame.add(new JScrollPane(connectedUserList), BorderLayout.EAST);
+        frame.validate();
+        frame.repaint();
+
+        frame.setVisible(true);
 
         // Thread for reading messages
         Thread reader = new Thread(() -> {
@@ -170,18 +182,31 @@ public class ClientGUI {
                 String message;
 
                 while ((message = in.readLine()) != null) {
+                    // User join/leave
+                    if (message.startsWith("USERLIST")) {
+                        String[] names = message.substring(9).split(",");
 
-                    // Display in middle for system message
-                    if (message.endsWith("has joined the chat.") || message.endsWith("has left the chat")) {
-                        appendMessage(message, centerAttr);
-
-                    } else if (message.startsWith(username + ":")) {
-                        // display own message on right side
-                        appendMessage(message, rightAttr);
-                    } else {
-                        // left for other users' message
-                        appendMessage(message, leftAttr);
+                        SwingUtilities.invokeLater(() -> {
+                            connectedUserListModel.clear();
+                            for (String n: names) {
+                                if (!n.isBlank()) connectedUserListModel.addElement(n);
+                            }
+                        });
                     }
+                    else {
+                        // Display in middle for system message
+                        if (message.endsWith("has joined the chat.") || message.endsWith("has left the chat")) {
+                            appendMessage(message, centerAttr);
+    
+                        } else if (message.startsWith(username + ":")) {
+                            // display own message on right side
+                            appendMessage(message, rightAttr);
+                        } else {
+                            // left for other users' message
+                            appendMessage(message, leftAttr);
+                        }
+                    }
+
                 }
             } catch (IOException ex) {
                 appendMessage("Connection lost.", centerAttr);
