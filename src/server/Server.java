@@ -32,13 +32,12 @@ public class Server {
     }
 
     // Broadcasting message to all connected clients, except self
-    public void broadcast(String senderUsername, String msg, ClientHandler exclude) {
+    public void broadcast(String senderUsername, String msg) { //, ClientHandler exclude) {
 
         for (ClientHandler c: clients) {
-            // Exclude message sending client
-            if (c != exclude) {
-                c.send(senderUsername, msg);
-            }
+            c.send(senderUsername, msg);
+            // if (c != exclude) {
+            // }
         }
     }
 

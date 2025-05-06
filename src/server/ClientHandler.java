@@ -36,20 +36,30 @@ public class ClientHandler implements Runnable {
             // Ask for username
             out.println("ENTER NAME:");
             String name = in.readLine();
-            // System.out.println("DEBUG: raw name='" + name + "' set contains before=" + activeUsernames);
             
             // Validate username
+
+            if (name == null) {
+                cleanup();
+                return;
+            }
+
             while (name == null || name.isBlank() || !activeUsernames.add(name)) {
-                out.println("Invalid Username or already in use");
-                out.println("Choose a new Name:");
+                out.println("Invalid Username or already in use. Choose a new name");
+                out.println("ENTER NAME:");
                 name = in.readLine();
+
+                if (name == null) {
+                    cleanup();
+                    return;
+                }
             }
 
             out.println("You have entered the chat!");
 
             // Announce new user
             this.username = name;
-            server.broadcast(null, name + " has joined the chat.", this);
+            server.broadcast(null, name + " has joined the chat.");
 
             String message;
 
@@ -57,11 +67,12 @@ public class ClientHandler implements Runnable {
                 System.out.println("Received: " + message);
 
                 // Broadcast message to all clients except self
-                server.broadcast(this.username, message, this);
+                server.broadcast(this.username, message);
             }
 
         } catch (IOException e) {
             System.err.println("Error: " + e.getMessage());
+            e.printStackTrace();
         } finally {
             cleanup();
         }
@@ -80,7 +91,7 @@ public class ClientHandler implements Runnable {
         clients.remove(this);
         if (username != null) {
             activeUsernames.remove(username);
-            server.broadcast(null, username + " has left the chat", this);
+            server.broadcast(null, username + " has left the chat");
         }
         try { 
             socket.close(); 

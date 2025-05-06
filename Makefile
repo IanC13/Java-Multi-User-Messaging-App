@@ -4,7 +4,7 @@ JAVA      := javac
 JAVAC     := $(JAVA)
 JAVA_RUN  := java
 PKG_SERV  := server.Server
-PKG_CLNT  := client.Client
+PKG_CLNT  := client.ClientGUI
 ALL_SRC   := $(shell find $(SRC_DIR) -name '*.java')
 ALL_CLASS := $(patsubst $(SRC_DIR)/%.java,$(BIN_DIR)/%.class,$(ALL_SRC))
 
