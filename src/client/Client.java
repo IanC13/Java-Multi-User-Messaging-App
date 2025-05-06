@@ -16,7 +16,7 @@ public class Client {
             BufferedReader console = new BufferedReader(new InputStreamReader(System.in));
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true)
-        ) {
+        ) { 
             System.out.println("Connected to server on port " + ProtocolConstants.PORT + "\n");
 
             ExecutorService pool = Executors.newSingleThreadExecutor();
