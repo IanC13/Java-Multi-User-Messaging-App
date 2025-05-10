@@ -58,8 +58,13 @@ public class ClientHandler implements Runnable {
             
             // Announce new user
             this.username = name;
+
+            server.insertUser(name);
+            server.sendChatHistory(out, 50);
+
             server.broadcast(null, name + " has joined the chat.");
             server.broadcastUserList(); 
+
 
             String message;
 
@@ -83,7 +88,7 @@ public class ClientHandler implements Runnable {
             out.println(msg);
 
         } else {
-            out.println(senderUsername + ": " + msg);
+            out.println("MSG " + senderUsername + "|" + msg);
         }
     }
 

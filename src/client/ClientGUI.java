@@ -6,6 +6,8 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.net.Socket;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import javax.swing.text.*;
 
@@ -193,18 +195,36 @@ public class ClientGUI {
                             }
                         });
                     }
-                    else {
-                        // Display in middle for system message
-                        if (message.endsWith("has joined the chat.") || message.endsWith("has left the chat")) {
-                            appendMessage(message, centerAttr);
-    
-                        } else if (message.startsWith(username + ":")) {
-                            // display own message on right side
-                            appendMessage(message, rightAttr);
-                        } else {
-                            // left for other users' message
-                            appendMessage(message, leftAttr);
-                        }
+                    // Display in middle for system message
+                    else if (message.endsWith("has joined the chat.") || message.endsWith("has left the chat")) {
+                        appendMessage(message, centerAttr);
+                    } 
+                    // History message
+                    else if (message.startsWith("HISTORY ")) {
+                        // HISTORY ts|sender|body
+                        String[] components = message.substring(8).split("\\|", 3);
+
+                        String ts = components[0], sender = components[1], content = components[2];
+                        
+                        // Determine display position, left for others or right for own message
+                        AttributeSet attr = sender.equals(username) ? rightAttr : leftAttr;
+
+                        appendMessage("[" + ts + "] " + sender + ": " + content, attr);
+                    }
+                    // Current session messages
+                    else if (message.startsWith("MSG ")) {
+
+                        // MSG sender|body
+                        String[] components = message.substring(4).split("\\|", 2);
+
+                        String sender = components[0], body = components[1];
+
+                        String ts = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+
+                        // Determine display position, left for others or right for own message
+                        AttributeSet attr = sender.equals(username) ? rightAttr : leftAttr;
+
+                        appendMessage("[" + ts + "] " + sender + ": " + body, attr);
                     }
 
                 }

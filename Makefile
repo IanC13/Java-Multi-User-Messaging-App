@@ -1,32 +1,46 @@
+# Project directories
 SRC_DIR   := src
 BIN_DIR   := bin
-JAVA      := javac
-JAVAC     := $(JAVA)
-JAVA_RUN  := java
+LIB_DIR   := lib
+
+# JDBC driver version and path
+JDBC_VERSION := 3.49.1.0
+JDBC_JAR     := $(LIB_DIR)/sqlite-jdbc-$(JDBC_VERSION).jar
+
+# Classpaths for compilation and execution
+CLASSPATH := $(BIN_DIR):$(JDBC_JAR)
+
+# Main classes
 PKG_SERV  := server.Server
 PKG_CLNT  := client.ClientGUI
+
+# All Java source files
 ALL_SRC   := $(shell find $(SRC_DIR) -name '*.java')
-ALL_CLASS := $(patsubst $(SRC_DIR)/%.java,$(BIN_DIR)/%.class,$(ALL_SRC))
 
 .PHONY: all compile server client clean
 
+# Default target
 all: compile
 
-compile: $(ALL_CLASS)
+# Compile every .java at once, so inter-dependencies resolve
+compile:
+	@mkdir -p $(BIN_DIR)
+	javac \
+	  -cp "$(CLASSPATH)" \
+	  -sourcepath $(SRC_DIR) \
+	  -d $(BIN_DIR) \
+	  $(ALL_SRC)
 
-# path
-$(BIN_DIR)/%.class: $(SRC_DIR)/%.java
-	@mkdir -p $(dir $@)
-	$(JAVAC) -d $(BIN_DIR) $<
-
-# Run server
+# Run the server (with JDBC driver on classpath)
 server: compile
-	$(JAVA_RUN) -cp $(BIN_DIR) $(PKG_SERV)
+	@echo "Starting server..."
+	java -cp "$(CLASSPATH)" $(PKG_SERV)
 
-# Run one client instance
+# Run one GUI client instance
 client: compile
-	$(JAVA_RUN) -cp $(BIN_DIR) $(PKG_CLNT)
+	@echo "Starting client..."
+	java -cp "$(CLASSPATH)" $(PKG_CLNT)
 
-# Remove all compiled classes
+# Clean up compiled classes
 clean:
 	rm -rf $(BIN_DIR)/*
